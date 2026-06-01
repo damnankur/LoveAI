@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.local
+dist/
+build/
+*.log
+.DS_Store
+__pycache__/
+*.pyc
+.huggingface/
+*.safetensors
+*.bin
+adapter_model/
