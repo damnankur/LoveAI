@@ -1,0 +1,24 @@
+# QLoRA Fine-tuning Configuration
+
+## Model
+- Base: mistralai/Mistral-7B-v0.1
+- Quantization: 4-bit (QLoRA)
+- Precision: bfloat16
+
+## Training
+- Epochs: 3
+- Learning Rate: 2e-4
+- Batch Size: 4
+- Gradient Accumulation: 4
+- Max Sequence Length: 2048
+
+## LoRA Parameters
+- Rank: 16
+- Alpha: 32
+- Dropout: 0.05
+- Target Modules: q_proj, k_proj, v_proj, o_proj
+
+## Dataset
+- Meta Persona-Chat (blended)
+- Custom persona evaluation pairs
+- DPO preference pairs for emotional alignment
