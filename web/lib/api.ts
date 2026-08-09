@@ -101,7 +101,9 @@ export interface ProfileResult {
   evaluation: ProfileEvaluation | null;
 }
 
-export async function googleLogin(idToken: string): Promise<{ token: string; user: AuthUser }> {
+export async function googleLogin(
+  idToken: string
+): Promise<{ token: string; user: AuthUser; created: boolean }> {
   const { data } = await api.post('/auth/google', { idToken });
   return data;
 }

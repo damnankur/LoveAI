@@ -9,4 +9,6 @@ export const config = {
   personaProjectionSeed: Number(process.env.PERSONA_SEED) || 42,
   authSessionTtlDays: Number(process.env.AUTH_SESSION_TTL_DAYS) || 30,
   allowDevToken: process.env.AUTH_ALLOW_DEV_TOKEN === 'true',
+  googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
 };

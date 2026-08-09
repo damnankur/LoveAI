@@ -15,7 +15,10 @@ interface GoogleProfile {
   picture: string | null;
 }
 
-export async function verifyGoogleIdToken(idToken: string): Promise<GoogleProfile> {
+export async function verifyGoogleIdToken(
+  idToken: string,
+  expectedClientId?: string
+): Promise<GoogleProfile> {
   if (config.allowDevToken && idToken.startsWith('dev:')) {
     const email = idToken.slice(4).trim().toLowerCase();
     if (!email || !email.includes('@')) {
@@ -31,6 +34,7 @@ export async function verifyGoogleIdToken(idToken: string): Promise<GoogleProfil
   }
   const info = (await res.json()) as {
     error?: string;
+    aud?: string;
     email?: string;
     email_verified?: string | boolean;
     name?: string;
@@ -41,6 +45,9 @@ export async function verifyGoogleIdToken(idToken: string): Promise<GoogleProfil
   if (String(info.email_verified) === 'false') {
     throw new Error('Google email is not verified');
   }
+  if (expectedClientId && info.aud !== expectedClientId) {
+    throw new Error('Google token audience does not match this client');
+  }
   return {
     email: String(info.email),
     name: info.name ? String(info.name) : null,
@@ -48,17 +55,22 @@ export async function verifyGoogleIdToken(idToken: string): Promise<GoogleProfil
   };
 }
 
-export async function upsertGoogleUser(profile: GoogleProfile): Promise<AuthUser> {
+export async function upsertGoogleUser(
+  profile: GoogleProfile
+): Promise<{ user: AuthUser; created: boolean }> {
   const { rows } = await pool.query(
     `INSERT INTO users (email, display_name) VALUES ($1, $2)
      ON CONFLICT (email) DO UPDATE SET display_name = COALESCE(users.display_name, EXCLUDED.display_name)
-     RETURNING id, email, display_name`,
+     RETURNING id, email, display_name, (xmax = 0) AS inserted`,
     [profile.email, profile.name]
   );
   return {
-    id: rows[0].id as string,
-    email: rows[0].email as string,
-    displayName: (rows[0].display_name as string | null) ?? null,
+    user: {
+      id: rows[0].id as string,
+      email: rows[0].email as string,
+      displayName: (rows[0].display_name as string | null) ?? null,
+    },
+    created: rows[0].inserted as boolean,
   };
 }
 

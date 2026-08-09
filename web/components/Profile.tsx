@@ -16,6 +16,14 @@ function Profile() {
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
   const [error, setError] = useState('');
+  const [welcome, setWelcome] = useState(false);
+
+  useEffect(() => {
+    if (window.localStorage.getItem('loveai_welcome')) {
+      setWelcome(true);
+      window.localStorage.removeItem('loveai_welcome');
+    }
+  }, []);
 
   useEffect(() => {
     if (!isLoggedIn()) {
@@ -89,6 +97,12 @@ function Profile() {
             {loggingOut ? <span className="spinner" /> : 'Log out'}
           </button>
         </div>
+
+        {welcome && (
+          <div className="welcome-banner">
+            Welcome — your account was created. Take the evaluation so your mirror can get to know you.
+          </div>
+        )}
 
         {error && <div className="error-banner">{error}</div>}
 
