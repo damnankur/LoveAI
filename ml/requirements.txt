@@ -1,0 +1,13 @@
+# loveai ML training environment (Python 3.12)
+--index-url https://download.pytorch.org/whl/cu121
+torch==2.5.1
+transformers>=5.0,<6
+peft>=0.20
+trl>=1.9
+bitsandbytes>=0.50
+datasets>=5.0
+accelerate>=1.14
+sentencepiece>=0.2
+fastapi>=0.141
+uvicorn>=0.52
+pydantic>=2.13
