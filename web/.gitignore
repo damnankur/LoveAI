@@ -8,3 +8,5 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# Deploys: GitHub (damnankur/LoveAI) -> Vercel project 'loveai' (production branch: main, root: web/)
