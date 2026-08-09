@@ -11,3 +11,6 @@ __pycache__/
 *.safetensors
 *.bin
 adapter_model/
+.venv/
+ml/models/
+ml/data/
