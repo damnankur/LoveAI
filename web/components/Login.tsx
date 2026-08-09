@@ -41,8 +41,6 @@ function loadGis(): Promise<void> {
 function Login() {
   const router = useRouter();
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-  const [idToken, setIdToken] = useState('');
-  const [showToken, setShowToken] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -66,8 +64,7 @@ function Login() {
 
   async function handleGoogleClick(mode: 'signin' | 'signup') {
     if (!googleClientId) {
-      setShowToken(true);
-      setError('No Google client ID configured yet — paste your ID token below to sign in.');
+      setError('Google sign-in is not configured yet.');
       return;
     }
     setBusy(true);
@@ -82,27 +79,16 @@ function Login() {
           if (resp.credential) {
             completeLogin(resp.credential, mode === 'signup');
           } else {
-            setError('Google did not return a credential — try pasting your ID token below.');
-            setShowToken(true);
+            setError('Google did not return a credential — try again.');
             setBusy(false);
           }
         },
       });
       window.google!.accounts.id.prompt();
     } catch (e: any) {
-      setError(e?.message || 'Google sign-in unavailable — paste your ID token below.');
-      setShowToken(true);
+      setError(e?.message || 'Google sign-in is unavailable right now.');
       setBusy(false);
     }
-  }
-
-  function handleTokenSubmit() {
-    const tok = idToken.trim();
-    if (!tok) {
-      setError('Paste your Google ID token first.');
-      return;
-    }
-    completeLogin(tok);
   }
 
   return (
@@ -133,40 +119,6 @@ function Login() {
           </svg>
           {busy ? <span className="spinner" /> : 'Create account with Google'}
         </button>
-
-        <div className="auth-divider"><span>or</span></div>
-
-        <div className={`token-paste ${showToken ? 'is-open' : ''}`}>
-          <button
-            type="button"
-            className="token-toggle"
-            onClick={() => setShowToken((v) => !v)}
-            aria-expanded={showToken}
-          >
-            Have an ID token? Paste it
-          </button>
-          {showToken && (
-            <div className="token-fields">
-              <label htmlFor="id-token">Google ID token</label>
-              <textarea
-                id="id-token"
-                value={idToken}
-                onChange={(e) => setIdToken(e.target.value)}
-                placeholder="eyJhbGciOiJSUzI1NiIs…"
-                rows={4}
-                className="input"
-              />
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={handleTokenSubmit}
-                disabled={busy || !idToken.trim()}
-              >
-                {busy ? <span className="spinner" /> : 'Sign in'}
-              </button>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
