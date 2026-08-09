@@ -9,6 +9,7 @@ import {
   fetchMatrix,
   submitEvaluation,
 } from '@/lib/api';
+import { clearSession, isLoggedIn } from '@/lib/session';
 
 const TRAIT_LABELS: Record<string, string> = {
   openness: 'Openness',
@@ -39,8 +40,7 @@ const STEP_ORDER = [
   { key: 'Values & Motivation', title: 'Values & motivation', hint: 'what pulls you forward' },
 ];
 
-function RadarChart({ scores }: { scores: { label: string; value: number }[] }) {
-  const size = 360;
+function RadarChart({ scores, size = 360 }: { scores: { label: string; value: number }[]; size?: number }) {
   const cx = size / 2;
   const cy = size / 2;
   const r = size * 0.34;
@@ -78,6 +78,53 @@ function RadarChart({ scores }: { scores: { label: string; value: number }[] }) 
   );
 }
 
+function ReflectionSlider({
+  value,
+  min,
+  max,
+  options,
+  onChange,
+}: {
+  value?: number;
+  min: number;
+  max: number;
+  options: ScaleOption[];
+  onChange: (v: number) => void;
+}) {
+  const current = value ?? min;
+  const pct = max > min ? ((current - min) / (max - min)) * 100 : 0;
+  const opt = options.find((o) => o.value === current);
+  return (
+    <div className="reflection">
+      <input
+        type="range"
+        className="reflection-track"
+        min={min}
+        max={max}
+        step={1}
+        value={current}
+        onChange={(e) => onChange(Number(e.target.value))}
+        style={{ ['--fill' as string]: `${pct}%` }}
+        aria-label="How much you resonate with this"
+      />
+      <div className="reflection-ends" aria-hidden="true">
+        <span>{options[0]?.label}</span>
+        <span>{options[options.length - 1]?.label}</span>
+      </div>
+      <div className="reflection-value">
+        {opt ? (
+          <>
+            <span className="scale-num">{opt.value}</span>
+            <span>{opt.label}</span>
+          </>
+        ) : (
+          <span className="reflection-prompt">drag to respond</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function PersonaEvaluation() {
   const router = useRouter();
   const [questions, setQuestions] = useState<MatrixQuestion[]>([]);
@@ -90,6 +137,10 @@ function PersonaEvaluation() {
   const [step, setStep] = useState(0);
 
   useEffect(() => {
+    if (!isLoggedIn()) {
+      router.replace('/login?next=/evaluate');
+      return;
+    }
     fetchMatrix()
       .then((m) => {
         setQuestions(m.questions);
@@ -97,7 +148,7 @@ function PersonaEvaluation() {
       })
       .catch((e) => setError(e?.message || 'Failed to load questions'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [router]);
 
   const answered = Object.keys(responses).length;
   const progress = questions.length ? (answered / questions.length) * 100 : 0;
@@ -122,6 +173,14 @@ function PersonaEvaluation() {
 
   const current = steps[step];
 
+  const liveRadar = useMemo(() => {
+    const drawn = BIG_FIVE.map((t) => ({
+      label: TRAIT_LABELS[t],
+      value: responses[t] ? responses[t] / 5 : 0,
+    }));
+    return drawn.some((d) => d.value > 0) ? drawn : null;
+  }, [responses]);
+
   function choose(id: string, value: number) {
     setResponses((r) => ({ ...r, [id]: value }));
   }
@@ -136,6 +195,11 @@ function PersonaEvaluation() {
       localStorage.removeItem('loveai_session_id');
       setResult(res);
     } catch (e: any) {
+      if (e?.response?.status === 401) {
+        clearSession();
+        router.replace('/login?next=/evaluate');
+        return;
+      }
       setError(e?.response?.data?.error || e?.message || 'Evaluation failed');
     } finally {
       setSubmitting(false);
@@ -219,11 +283,18 @@ function PersonaEvaluation() {
         </div>
       </div>
 
+      {liveRadar && (
+        <aside className="eval-live-radar" aria-hidden="true">
+          <RadarChart scores={liveRadar} size={140} />
+          <span className="hand">your shape, taking form…</span>
+        </aside>
+      )}
+
       {error && <div className="error-banner reveal">{error}</div>}
       {loading && <p className="hand" style={{ fontSize: 20, textAlign: 'center' }}>opening the envelope…</p>}
 
       {!loading && current && (
-        <section className="cat-block">
+        <section className="cat-block" data-reveal>
           <h2 className="cat-title">{current.title}</h2>
           <hr className="cat-rule" />
           <div className="step-hint">{current.hint}</div>
@@ -237,25 +308,13 @@ function PersonaEvaluation() {
                   <span className="q-category">{q.trait.replace(/_/g, ' ')}</span>
                   <span className="q-text">{q.text}</span>
                 </legend>
-                <div className="scale-radio-group">
-                  {scale.map((opt) => (
-                    <label
-                      key={opt.value}
-                      className={`scale-radio-label ${responses[q.id] === opt.value ? 'selected' : ''}`}
-                    >
-                      <input
-                        type="radio"
-                        name={`question-${q.id}`}
-                        value={opt.value}
-                        checked={responses[q.id] === opt.value}
-                        onChange={() => choose(q.id, opt.value)}
-                        className="sr-only"
-                      />
-                      <span className="scale-num">{opt.value}</span>
-                      <span className="scale-text">{opt.label}</span>
-                    </label>
-                  ))}
-                </div>
+                <ReflectionSlider
+                  value={responses[q.id]}
+                  min={scale[0]?.value ?? 1}
+                  max={scale[scale.length - 1]?.value ?? 5}
+                  options={scale}
+                  onChange={(v) => choose(q.id, v)}
+                />
               </fieldset>
             ))}
           </div>

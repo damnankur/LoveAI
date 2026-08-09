@@ -8,7 +8,7 @@ import InvitationCard from './InvitationCard';
 import { googleLogin } from '@/lib/api';
 import { isLoggedIn, setSession } from '@/lib/session';
 
-function Login() {
+function Signup() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [inviting, setInviting] = useState(false);
@@ -35,7 +35,7 @@ function Login() {
       }
       goTo();
     } catch (e: any) {
-      setError(e?.response?.data?.error || e?.message || 'Sign in failed');
+      setError(e?.response?.data?.error || e?.message || 'Sign up failed');
     }
   }
 
@@ -43,7 +43,7 @@ function Login() {
     return <InvitationCard onComplete={goTo} />;
   }
 
-  const switchHref = '/signup' + (next ? `?next=${encodeURIComponent(next)}` : '');
+  const switchHref = '/login' + (next ? `?next=${encodeURIComponent(next)}` : '');
 
   return (
     <div className="auth-page">
@@ -51,9 +51,9 @@ function Login() {
         <span className="auth-seal" aria-hidden="true">
           ♥
         </span>
-        <span className="stamp">welcome back</span>
-        <h1>Sign in</h1>
-        <div className="hand">return to your companion</div>
+        <span className="stamp">the invitation</span>
+        <h1>Create your account</h1>
+        <div className="hand">one quiet step, then we begin</div>
 
         {error && (
           <div className="error-banner" role="status" aria-live="polite">
@@ -61,22 +61,22 @@ function Login() {
           </div>
         )}
 
-        <GoogleButton mode="signin" label="Continue with Google" onSuccess={onSuccess} onError={setError} />
+        <GoogleButton mode="signup" label="Create account with Google" onSuccess={onSuccess} onError={setError} />
 
         <div className="auth-divider" role="presentation">
           <span>or</span>
         </div>
 
         <p className="auth-switch">
-          New here? <Link href={switchHref}>Create your account</Link>
+          Already have an account? <Link href={switchHref}>Sign in</Link>
         </p>
 
         <p className="auth-terms">
-          By continuing, you agree to loveAI&apos;s terms, privacy notice, and cookie policy.
+          By joining, you agree to loveAI&apos;s terms, privacy notice, and cookie policy.
         </p>
       </div>
     </div>
   );
 }
 
-export default Login;
+export default Signup;

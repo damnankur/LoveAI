@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import ThemeInit from '@/lib/theme-init';
+import RevealObserver from '@/components/RevealObserver';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -20,12 +21,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Caveat:wght@400..700&family=Sora:wght@300..800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Caveat:wght@400..700&family=Lora:ital,wght@0,400..700;1,400..700&display=swap"
           rel="stylesheet"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.setAttribute('data-reveal-ready','')",
+          }}
         />
       </head>
       <body>
         <ThemeInit />
+        <RevealObserver />
         {children}
       </body>
     </html>

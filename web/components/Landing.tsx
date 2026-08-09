@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import ThemeToggle from './ThemeToggle';
+import WaxSealButton from './WaxSealButton';
 import { isLoggedIn } from '@/lib/session';
 
 const STEPS = [
@@ -94,7 +95,7 @@ function Landing() {
               {hasPersona ? (
                 <Link href="/chat" className="btn btn-primary btn-sm nav-link-label">Continue</Link>
               ) : (
-                <Link href="/evaluate" className="btn btn-primary btn-sm nav-link-label">Find your voice</Link>
+                <Link href={authed ? '/evaluate' : '/login?next=/evaluate'} className="btn btn-primary btn-sm nav-link-label">Find your voice</Link>
               )}
             </li>
             <li className="nav-auth">
@@ -123,9 +124,11 @@ function Landing() {
               rhythm of <em>your</em> mind — not a generic bot, but a reflection of who you are.
             </p>
             <div className="hero-actions reveal d4">
-              <button className="btn btn-primary btn-lg" onClick={() => router.push('/evaluate')}>
-                Start my discovery
-              </button>
+              <WaxSealButton
+                label="Start my discovery"
+                caption="start my discovery"
+                onClick={() => router.push(isLoggedIn() ? '/evaluate' : '/login?next=/evaluate')}
+              />
               {hasPersona && (
                 <Link href="/chat" className="btn btn-ghost btn-lg">Continue to chat</Link>
               )}
@@ -189,13 +192,13 @@ function Landing() {
 
         {/* How it works */}
         <section className="section" id="how">
-          <div className="section-head">
+          <div className="section-head" data-reveal>
             <h2>How it works</h2>
             <span className="hand">three small steps, one big difference</span>
           </div>
           <div className="steps">
             {STEPS.map((s, i) => (
-              <article key={s.num} className="step reveal d1" style={{ animationDelay: `${i * 120}ms` }}>
+              <article key={s.num} className="step" data-reveal style={{ transitionDelay: `${i * 120}ms` }}>
                 <span className="step-tag">{s.tag}</span>
                 <div className="step-num">{s.num}</div>
                 <h3>{s.title}</h3>
@@ -207,13 +210,13 @@ function Landing() {
 
         {/* Letters / features */}
         <section className="section" id="why">
-          <div className="section-head">
+          <div className="section-head" data-reveal>
             <h2>Why loveAI</h2>
             <span className="hand">three love letters, sealed &amp; signed</span>
           </div>
           <div className="letters">
             {LETTERS.map((l, i) => (
-              <article key={l.title} className="letter reveal d1" style={{ animationDelay: `${i * 120}ms` }}>
+              <article key={l.title} className="letter" data-reveal style={{ transitionDelay: `${i * 120}ms` }}>
                 <span className="letter-seal" aria-hidden="true">{l.seal}</span>
                 <div className="letter-icon" aria-hidden="true">{l.icon}</div>
                 <h3>{l.title}</h3>
@@ -226,14 +229,16 @@ function Landing() {
 
         {/* CTA */}
         <section className="section">
-          <div className="cta-band reveal">
+          <div className="cta-band" data-reveal>
             <span className="cta-hearts h1" aria-hidden="true">♥</span>
             <span className="cta-hearts h2" aria-hidden="true">♥</span>
             <h2>Write to the person <em>you’re becoming.</em></h2>
             <span className="hand">Sealed with a promise — to know you better than anyone else.</span>
-            <button className="btn btn-primary btn-lg" onClick={() => router.push('/evaluate')}>
-              Start my discovery
-            </button>
+            <WaxSealButton
+              label="Start my discovery"
+              caption="break the seal"
+              onClick={() => router.push(isLoggedIn() ? '/evaluate' : '/login?next=/evaluate')}
+            />
             <p>A quiet journey to the heart of how you think.</p>
           </div>
         </section>

@@ -113,6 +113,11 @@ export async function fetchMe(): Promise<AuthUser> {
   return data.user;
 }
 
+export async function updateDisplayName(displayName: string): Promise<AuthUser> {
+  const { data } = await api.patch('/auth/me', { displayName });
+  return data.user;
+}
+
 export async function logout(): Promise<void> {
   await api.post('/auth/logout');
 }
