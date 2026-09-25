@@ -1,0 +1,15 @@
+{
+  "id": "singhankur01/loveai-persona-model-training-gemma-3-1b-qlora",
+  "title": "loveAI Persona Model - Training (Gemma-3-1B QLoRA)",
+  "code_file": "loveai-persona-train.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_internet": "true",
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": ["singhankur01/loveai-persona-data"],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}

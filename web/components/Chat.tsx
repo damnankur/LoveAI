@@ -20,6 +20,7 @@ const STARTERS = [
 
 interface LocalPersona {
   archetype: string;
+  personaType?: string;
   personaText: string;
   profile: Record<string, number>;
 }
@@ -29,7 +30,7 @@ interface UiMessage {
   role: 'user' | 'assistant';
   content: string;
   ragUsed?: boolean;
-  rag?: { id: string; similarity: number }[];
+  rag?: { id: string; personaType: string | null; similarity: number }[];
 }
 
 function toUi(m: ChatMessageRecord): UiMessage {
@@ -128,13 +129,14 @@ function Chat() {
           <div className="chat-avatar" aria-hidden="true">♥</div>
           <div>
             <h1>Your companion</h1>
-            <div className="hand">{persona?.archetype || 'someone who knows you'}</div>
+            <div className="hand">
+              {persona?.personaType ? `${persona.personaType} · ${persona.archetype}` : persona?.archetype || 'someone who knows you'}
+            </div>
           </div>
-        </div>
-        <div className="chat-actions">
+        </div>        <div className="chat-actions">
           <span className="status-pill">
             <span className="status-dot" aria-hidden="true" />
-            <span className="status-pill-text">Qwen2.5-1.5B · QLoRA</span>
+            <span className="status-pill-text">Gemma 3 1B · QLoRA</span>
           </span>
           <span className="status-pill">
             <span className="status-dot" aria-hidden="true" />
@@ -245,7 +247,7 @@ function Chat() {
               ragFor.rag.map((p) => (
                 <div key={p.id} className="rag-row">
                   <span className="rag-sim">{Math.round(p.similarity * 100)}%</span>
-                  <span>persona {p.id}</span>
+                  <span>{p.personaType || 'another person'}</span>
                 </div>
               ))
             )}

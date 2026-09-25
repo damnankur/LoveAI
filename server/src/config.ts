@@ -7,8 +7,12 @@ export const config = {
   databaseUrl:
     process.env.DATABASE_URL ||
     'postgresql://loveai:loveai_pw@localhost:5432/loveai',
-  // URL of the self-hosted fine-tuned model inference server (ml/serve.py)
+  // URL of the fine-tuned model inference server (ml/serve.py) or any
+  // OpenAI-compatible endpoint (e.g. Gemini: LLM_CHAT_PATH=/chat/completions).
   llmUrl: process.env.LLM_URL || 'http://localhost:8000',
+  llmChatPath: process.env.LLM_CHAT_PATH || '/v1/chat/completions',
+  llmModel: process.env.LLM_MODEL || 'gemini-3.6-flash',
+  llmApiKey: process.env.LLM_API_KEY || '',
   llmEnabled: process.env.LLM_ENABLED !== 'false',
   llmTimeoutMs: Number(process.env.LLM_TIMEOUT_MS) || 60000,
   // When true, never call the inference server (deterministic local fallback)

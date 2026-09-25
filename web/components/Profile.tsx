@@ -12,6 +12,7 @@ function Profile() {
   const [questions, setQuestions] = useState<MatrixQuestion[]>([]);
   const [scale, setScale] = useState<ScaleOption[]>([]);
   const [hasEval, setHasEval] = useState(false);
+  const [personaType, setPersonaType] = useState<string | null>(null);
   const [completedAt, setCompletedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -38,6 +39,7 @@ function Profile() {
         if (p.evaluation) {
           setResponses(p.evaluation.responses);
           setHasEval(true);
+          setPersonaType(p.evaluation.personaType);
           setCompletedAt(p.evaluation.completedAt);
         }
       })
@@ -85,7 +87,7 @@ function Profile() {
             <h1>{user?.displayName || user?.email || 'Your profile'}</h1>
             <div className="hand">{user?.email}</div>
             <div className="badge-soft">
-              {hasEval ? 'persona complete' : 'no persona yet'}
+              {hasEval ? (personaType ? personaType : 'persona complete') : 'no persona yet'}
             </div>
           </div>
           <button

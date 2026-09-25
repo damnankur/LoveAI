@@ -1,6 +1,7 @@
 import { config } from './config';
 import { StoredPersona } from './store';
 import { personaArchetype, Profile } from './persona/profile';
+import { extractRelevantContext } from './context';
 
 export interface ChatTurn {
   role: 'user' | 'assistant';
@@ -21,7 +22,9 @@ function buildSystemPrompt(o: GenerateOptions): string {
       ? o.similarPersonas
           .map(
             (p, i) =>
-              `[Similar persona ${i + 1} (similarity ${(p.similarity ?? 0).toFixed(2)})]\n${p.profile}`
+              `[Similar persona ${i + 1} (similarity ${(p.similarity ?? 0).toFixed(2)}${
+                p.personaType ? `, type: ${p.personaType}` : ''
+              })]\n${p.profile}`
           )
           .join('\n\n')
       : 'No similar personas retrieved yet.';
@@ -89,7 +92,8 @@ export async function generateReply(o: GenerateOptions): Promise<string> {
   if (config.llmMock || !config.llmEnabled) return mockReply(o);
 
   const system = buildSystemPrompt(o);
-  const messages: ChatTurn[] = o.history.slice(-12);
+  // Smart context extraction: select top-12 most relevant past turns (not just last 12)
+  const messages: ChatTurn[] = extractRelevantContext(o.history, o.userMessage, 12);
   messages.push({ role: 'user', content: o.userMessage });
 
   try {
@@ -97,11 +101,12 @@ export async function generateReply(o: GenerateOptions): Promise<string> {
     const t = setTimeout(() => controller.abort(), config.llmTimeoutMs);
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (config.llmApiKey) headers.Authorization = `Bearer ${config.llmApiKey}`;
-    const res = await fetch(`${config.llmUrl}/v1/chat/completions`, {
+    const res = await fetch(`${config.llmUrl}${config.llmChatPath}`, {
       method: 'POST',
       headers,
       signal: controller.signal,
       body: JSON.stringify({
+        model: config.llmModel,
         messages: [{ role: 'system', content: system }, ...messages],
         max_tokens: 220,
         temperature: 0.8,

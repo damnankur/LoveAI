@@ -1,0 +1,21 @@
+# CPU-only inference dependencies for ml/aws/serve.py.
+#
+# Deliberately NOT ml/requirements.txt: that file pins the CUDA training stack
+# (--index-url .../whl/cu121 pulls ~2.5 GB of torch+CUDA wheels, plus trl/datasets/
+# bitsandbytes which are useless at inference time). On a 2 vCPU / 2 GiB box that
+# is pure bloat: image size, EBS usage, and build time.
+#
+# Install order matters — torch first, from the CPU wheel index (has linux_aarch64
+# wheels for Graviton). The generic PyPI x86_64 torch wheel bundles CUDA:
+#   pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements-aws.txt
+# The second command leaves the already-installed 2.5.1+cpu alone (PEP 440: a
+# specifier without a local version ignores the local segment).
+torch==2.5.1
+transformers>=5.0,<6
+peft>=0.20
+accelerate>=1.14
+sentencepiece>=0.2
+fastapi>=0.141
+uvicorn>=0.52
+pydantic>=2.13

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { MATRIX } from '@/lib/persona/matrix';
 import { computeProfile, buildPersonaText, personaArchetype, RawResponses } from '@/lib/persona/profile';
 import { buildVector } from '@/lib/persona/vector';
+import { matchPersonaType } from '@/lib/persona/types';
 import { savePersona } from '@/lib/store';
 import { pool } from '@/lib/db';
 import { config } from '@/lib/config';
@@ -33,6 +34,7 @@ export async function POST(req: NextRequest) {
     const vector = buildVector(profile, config.vectorDim, config.personaProjectionSeed);
     const personaText = buildPersonaText(profile);
     const archetype = personaArchetype(profile);
+    const personaType = matchPersonaType(profile);
 
     const authUser = await getAuthUser(req);
     let userId: string | null = authUser?.id ?? null;
@@ -52,12 +54,18 @@ export async function POST(req: NextRequest) {
       dimensions: profile as unknown as Record<string, number>,
       profile: personaText,
       vector,
+      personaType: personaType.label,
     });
 
     return NextResponse.json(
       {
         evaluationId,
         archetype,
+        personaType: {
+          key: personaType.key,
+          label: personaType.label,
+          tagline: personaType.tagline,
+        },
         profile: profile,
         personaText,
         vectorDim: vector.length,

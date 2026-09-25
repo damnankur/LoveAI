@@ -191,7 +191,7 @@ function PersonaEvaluation() {
     try {
       const res = await submitEvaluation(responses);
       localStorage.setItem('loveai_evaluation_id', res.evaluationId);
-      localStorage.setItem('loveai_persona', JSON.stringify({ archetype: res.archetype, personaText: res.personaText, profile: res.profile }));
+      localStorage.setItem('loveai_persona', JSON.stringify({ archetype: res.archetype, personaType: res.personaType?.label, personaText: res.personaText, profile: res.profile }));
       localStorage.removeItem('loveai_session_id');
       setResult(res);
     } catch (e: any) {
@@ -216,8 +216,8 @@ function PersonaEvaluation() {
       <div className="eval-page">
         <div className="result-hero reveal">
           <span className="stamp">your persona</span>
-          <h2>{result.archetype}</h2>
-          <div className="hand">this is you — on paper, in vector</div>
+          <h2>{result.personaType?.label ?? result.archetype}</h2>
+          <div className="hand">{result.personaType?.tagline ?? 'this is you — on paper, in vector'}</div>
           <p>
             {result.vectorDim}-dimension profile · pgvector cosine search enabled
           </p>

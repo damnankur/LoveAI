@@ -1,0 +1,202 @@
+{
+  "name": "LoveAI Persona Evaluation Matrix",
+  "description": "34-question psychological matrix (17 dimensions x 2 items, balanced keying). Likert 1-5. Reverse = agreement lowers the trait score. Canonical TS source: server/src/persona/matrix.ts (mirrored here for the ML pipeline).",
+  "scale": {
+    "min": 1,
+    "max": 5,
+    "options": [
+      { "value": 1, "label": "Strongly disagree" },
+      { "value": 2, "label": "Disagree" },
+      { "value": 3, "label": "Neutral" },
+      { "value": 4, "label": "Agree" },
+      { "value": 5, "label": "Strongly agree" }
+    ]
+  },
+  "trait_order": [
+    "openness",
+    "conscientiousness",
+    "extraversion",
+    "agreeableness",
+    "neuroticism",
+    "self_awareness",
+    "self_regulation",
+    "empathy",
+    "social_skills",
+    "assertiveness",
+    "active_listening",
+    "verbal_preference",
+    "conflict_style",
+    "intrinsic_motivation",
+    "extrinsic_motivation",
+    "core_values",
+    "life_goals"
+  ],
+  "categories": [
+    {
+      "id": "big_five",
+      "label": "Big Five",
+      "traits": [
+        {
+          "id": "openness",
+          "label": "Openness",
+          "questions": [
+            { "id": "o1", "text": "I enjoy exploring new ideas, even ones that challenge my beliefs.", "reverse": false },
+            { "id": "o2", "text": "I prefer routines and familiar ways of doing things.", "reverse": true }
+          ]
+        },
+        {
+          "id": "conscientiousness",
+          "label": "Conscientiousness",
+          "questions": [
+            { "id": "c1", "text": "I follow through on tasks even when they are tedious.", "reverse": false },
+            { "id": "c2", "text": "I often leave things half-finished or put them off to the last minute.", "reverse": true }
+          ]
+        },
+        {
+          "id": "extraversion",
+          "label": "Extraversion",
+          "questions": [
+            { "id": "e1", "text": "I feel energized by meeting new people.", "reverse": false },
+            { "id": "e2", "text": "I tend to be quiet and reserved around new people.", "reverse": true }
+          ]
+        },
+        {
+          "id": "agreeableness",
+          "label": "Agreeableness",
+          "questions": [
+            { "id": "a1", "text": "I go out of my way to help people who need it.", "reverse": false },
+            { "id": "a2", "text": "I sometimes come across as cold or indifferent to others.", "reverse": true }
+          ]
+        },
+        {
+          "id": "neuroticism",
+          "label": "Neuroticism",
+          "questions": [
+            { "id": "n1", "text": "I worry about things long after they are over.", "reverse": false },
+            { "id": "n2", "text": "I stay calm and even-tempered under stress.", "reverse": true }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "emotional_intelligence",
+      "label": "Emotional Intelligence",
+      "traits": [
+        {
+          "id": "self_awareness",
+          "label": "Self-awareness",
+          "questions": [
+            { "id": "sa1", "text": "I usually know why I feel the way I do.", "reverse": false },
+            { "id": "sa2", "text": "My own emotions often take me by surprise.", "reverse": true }
+          ]
+        },
+        {
+          "id": "self_regulation",
+          "label": "Self-regulation",
+          "questions": [
+            { "id": "sr1", "text": "When I get upset, I can calm myself down quickly.", "reverse": false },
+            { "id": "sr2", "text": "My temper gets the better of me under pressure.", "reverse": true }
+          ]
+        },
+        {
+          "id": "empathy",
+          "label": "Empathy",
+          "questions": [
+            { "id": "em1", "text": "I can sense how people around me are feeling even before they say it.", "reverse": false },
+            { "id": "em2", "text": "I am not easily moved by other people\u2019s moods.", "reverse": true }
+          ]
+        },
+        {
+          "id": "social_skills",
+          "label": "Social skills",
+          "questions": [
+            { "id": "ss1", "text": "I find it easy to make people feel comfortable around me.", "reverse": false },
+            { "id": "ss2", "text": "I struggle to get others to see my point of view.", "reverse": true }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "communication",
+      "label": "Communication",
+      "traits": [
+        {
+          "id": "assertiveness",
+          "label": "Assertiveness",
+          "questions": [
+            { "id": "as1", "text": "I can say \u201cno\u201d without feeling guilty about it.", "reverse": false },
+            { "id": "as2", "text": "I tend to give in to avoid conflict, even when I disagree.", "reverse": true }
+          ]
+        },
+        {
+          "id": "active_listening",
+          "label": "Active listening",
+          "questions": [
+            { "id": "pl1", "text": "When someone is talking, I give them my full attention and don\u2019t interrupt.", "reverse": false },
+            { "id": "pl2", "text": "I often start planning my reply while the other person is still speaking.", "reverse": true }
+          ]
+        },
+        {
+          "id": "verbal_preference",
+          "label": "Verbal/text preference",
+          "questions": [
+            { "id": "vp1", "text": "I\u2019d rather have a long text conversation than a phone call.", "reverse": false },
+            { "id": "vp2", "text": "I prefer talking out loud (voice or video) to typing.", "reverse": true }
+          ]
+        },
+        {
+          "id": "conflict_style",
+          "label": "Conflict resolution style",
+          "questions": [
+            { "id": "cf1", "text": "In a disagreement, I prefer to address the issue directly and work it out together.", "reverse": false },
+            { "id": "cf2", "text": "When there is tension, I\u2019d rather avoid the topic and let it pass.", "reverse": true }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "values",
+      "label": "Values & Motivation",
+      "traits": [
+        {
+          "id": "intrinsic_motivation",
+          "label": "Intrinsic motivation",
+          "questions": [
+            { "id": "im1", "text": "I do my best work when the task itself genuinely interests me.", "reverse": false },
+            { "id": "im2", "text": "I only really push myself when there is an external payoff (reward, praise, deadline).", "reverse": true }
+          ]
+        },
+        {
+          "id": "extrinsic_motivation",
+          "label": "Extrinsic motivation",
+          "questions": [
+            { "id": "xm1", "text": "Recognition, praise, and tangible rewards strongly motivate me.", "reverse": false },
+            { "id": "xm2", "text": "Status, titles, and material rewards matter little to me.", "reverse": true }
+          ]
+        },
+        {
+          "id": "core_values",
+          "label": "Core values",
+          "questions": [
+            { "id": "cv1", "text": "It is important to me to act with integrity, even when it causes friction.", "reverse": false },
+            { "id": "cv2", "text": "It is more important to me that my life stays stable and predictable than that I push for change.", "reverse": true }
+          ]
+        },
+        {
+          "id": "life_goals",
+          "label": "Life goals alignment",
+          "questions": [
+            { "id": "lg1", "text": "I want my life to be full of new experiences and adventures.", "reverse": false },
+            { "id": "lg2", "text": "I measure success by concrete achievements and milestones, not by new experiences.", "reverse": true }
+          ]
+        }
+      ]
+    }
+  ],
+  "vector": {
+    "dim": 768,
+    "method": "gaussian_random_projection",
+    "seed": 42,
+    "description": "17-dim normalized profile centered at 0.5, projected with a seeded Gaussian matrix (mulberry32 + Box-Muller) into 768 dims, L2-normalized. Cosine similarity in pgvector then reflects trait proximity. TS implementation: server/src/persona/vector.ts."
+  }
+}

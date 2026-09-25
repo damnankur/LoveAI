@@ -1,6 +1,8 @@
 export const config = {
   databaseUrl: process.env.DATABASE_URL || '',
   llmUrl: process.env.LLM_URL || '',
+  llmChatPath: process.env.LLM_CHAT_PATH || '/v1/chat/completions',
+  llmModel: process.env.LLM_MODEL || 'gemini-3.6-flash',
   llmEnabled: process.env.LLM_ENABLED !== 'false',
   llmMock: process.env.LLM_MOCK === 'true',
   llmApiKey: process.env.LLM_API_KEY || '',
@@ -8,7 +10,8 @@ export const config = {
   vectorDim: 768,
   personaProjectionSeed: Number(process.env.PERSONA_SEED) || 42,
   authSessionTtlDays: Number(process.env.AUTH_SESSION_TTL_DAYS) || 30,
-  allowDevToken: process.env.AUTH_ALLOW_DEV_TOKEN === 'true',
+  allowDevToken:
+    process.env.AUTH_ALLOW_DEV_TOKEN === 'true' && process.env.NODE_ENV !== 'production',
   googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
 };

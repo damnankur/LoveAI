@@ -1,9 +1,9 @@
 # QLoRA Fine-tuning Configuration (small model, 4GB-VRAM friendly)
 
 ## Model
-- Base: Qwen/Qwen2.5-1.5B-Instruct
+- Base: google/gemma-3-1b-it (Google's open Gemma 3 1B, chat variant)
 - Quantization: 4-bit (bitsandbytes, QLoRA)
-- Precision: bfloat16
+- Precision: fp16 on Turing (GTX 1650 Ti, no bf16) / bf16 on Ampere+
 
 ## Training (SFT)
 - Epochs: 3
@@ -23,5 +23,6 @@
 - Synthetic persona DPO preference pairs for emotional alignment
 
 ## Notes
-- GTX 1650 Ti (4 GB VRAM): Qwen2.5-1.5B QLoRA fits with bf16 + 4-bit base.
+- GTX 1650 Ti (4 GB VRAM): Gemma 3 1B QLoRA fits with fp16 + 4-bit base (~3-4 GB).
+- Gemma is gated on HF: accept the license + set HF_TOKEN before training.
 - Cloud alternative for bigger models: AWS EC2 g5.xlarge / rented VPS.

@@ -125,7 +125,7 @@ function Chat() {
         <div className="chat-actions">
           <span className="status-pill">
             <span className="status-dot" aria-hidden="true" />
-            <span className="status-pill-text">Qwen2.5-1.5B · QLoRA</span>
+            <span className="status-pill-text">Gemma 3 1B · QLoRA</span>
           </span>
           <span className="status-pill">
             <span className="status-dot" aria-hidden="true" />

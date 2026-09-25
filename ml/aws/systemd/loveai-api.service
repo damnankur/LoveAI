@@ -1,0 +1,33 @@
+# loveAI persona inference — Docker/PyTorch (serve.py) server, alternative to
+# loveai-llama.service. Enable ONE of the two:
+#   systemctl enable --now loveai-llama     # GGUF path (recommended, 2 GiB OK)
+#   systemctl enable --now loveai-api       # container path (needs >= 4 GiB)
+#   systemctl disable --now loveai-llama    # when switching to this one
+#
+# Note: User=loveai + docker group is equivalent to root via the Docker socket.
+# That is accepted here because the image is built from this repo and the model file
+# is the only thing mounted into it.
+[Unit]
+Description=loveAI persona inference server (docker: FastAPI serve.py, :8000)
+Documentation=file:/opt/loveai/README.txt
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=loveai
+SupplementaryGroups=docker
+EnvironmentFile=-/etc/loveai/deploy.env
+ExecStartPre=-/usr/bin/docker stop loveai-api
+ExecStart=/usr/local/bin/loveai-start-api.sh
+ExecStop=/usr/bin/docker stop loveai-api
+Restart=always
+RestartSec=10
+TimeoutStopSec=60
+LimitNOFILE=65535
+SyslogIdentifier=loveai-api
+
+[Install]
+WantedBy=multi-user.target

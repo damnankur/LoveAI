@@ -10,7 +10,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 const RAG_LIMIT = Number(process.env.RAG_LIMIT) || 5;
-const RAG_MIN_SIMILARITY = Number(process.env.RAG_MIN_SIMILARITY) || 0.25;
+const RAG_MIN_SIMILARITY = Number(process.env.RAG_MIN_SIMILARITY) || 0.7;
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getSession(params.id);
@@ -60,6 +60,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       reply,
       similarPersonas: similarPersonas.map((p) => ({
         id: p.id,
+        personaType: p.personaType ?? null,
         similarity: Number((p.similarity ?? 0).toFixed(3)),
       })),
       ragUsed: similarPersonas.length > 0,

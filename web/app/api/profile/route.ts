@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   try {
     const { rows } = await pool.query(
-      `SELECT id, responses, dimensions, profile, completed_at
+      `SELECT id, responses, dimensions, profile, persona_type, completed_at
        FROM persona_evaluations
        WHERE user_id = $1
        ORDER BY completed_at DESC
@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
             responses: rows[0].responses,
             dimensions: rows[0].dimensions,
             profile: rows[0].profile,
+            personaType: rows[0].persona_type ?? null,
             completedAt: rows[0].completed_at,
           }
         : null,

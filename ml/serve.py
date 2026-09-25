@@ -19,7 +19,7 @@ from pydantic import BaseModel
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 import uvicorn
 
-BASE_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
+BASE_MODEL = "google/gemma-3-1b-it"
 DEFAULT_ADAPTER = os.environ.get("PERSONA_ADAPTER", "ml/models/persona-dpo")
 
 model = None
@@ -37,17 +37,18 @@ def compute_dtype() -> torch.dtype:
 
 def load(adapter_dir: str | None) -> None:
     global model, tokenizer
+    base_id = os.environ.get("PERSONA_BASE_MODEL", BASE_MODEL)
     bnb = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
         bnb_4bit_compute_dtype=compute_dtype(),
         bnb_4bit_use_double_quant=True,
     ) if torch.cuda.is_available() else None
-    tokenizer = AutoTokenizer.from_pretrained(adapter_dir if adapter_dir and os.path.isdir(adapter_dir) else BASE_MODEL)
+    tokenizer = AutoTokenizer.from_pretrained(adapter_dir if adapter_dir and os.path.isdir(adapter_dir) else base_id)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
     base = AutoModelForCausalLM.from_pretrained(
-        BASE_MODEL, quantization_config=bnb, device_map="auto", torch_dtype=compute_dtype()
+        base_id, quantization_config=bnb, device_map="auto", torch_dtype=compute_dtype()
     )
     if adapter_dir and os.path.isdir(adapter_dir):
         model = PeftModel.from_pretrained(base, adapter_dir)
@@ -109,8 +110,10 @@ def chat(req: ChatRequest) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--adapter", default=DEFAULT_ADAPTER)
+    ap.add_argument("--model", default=BASE_MODEL, help="Base model id (override for non-Gemma smoke tests)")
     ap.add_argument("--port", type=int, default=int(os.environ.get("PORT", 8000)))
     args = ap.parse_args()
+    os.environ.setdefault("PERSONA_BASE_MODEL", args.model)
     os.environ.setdefault("PERSONA_ADAPTER", args.adapter)
     uvicorn.run(app, host="0.0.0.0", port=args.port)
 

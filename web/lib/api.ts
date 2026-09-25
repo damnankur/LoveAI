@@ -21,6 +21,7 @@ export interface MatrixResponse {
 export interface EvaluateResult {
   evaluationId: string;
   archetype: string;
+  personaType: { key: string; label: string; tagline: string };
   profile: Record<string, number>;
   personaText: string;
   vectorDim: number;
@@ -34,7 +35,7 @@ export interface ChatSession {
 
 export interface SendResult {
   reply: string;
-  similarPersonas: { id: string; similarity: number }[];
+  similarPersonas: { id: string; personaType: string | null; similarity: number }[];
   ragUsed: boolean;
 }
 
@@ -93,6 +94,7 @@ export interface ProfileEvaluation {
   responses: Record<string, number>;
   dimensions: Record<string, number>;
   profile: string;
+  personaType: string | null;
   completedAt: string;
 }
 

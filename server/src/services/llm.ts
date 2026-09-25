@@ -96,12 +96,15 @@ export async function generateReply(o: GenerateOptions): Promise<string> {
   try {
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), config.llmTimeoutMs);
-    // OpenAI-compatible endpoint served by ml/serve.py.
-    const res = await fetch(`${config.llmUrl}/v1/chat/completions`, {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (config.llmApiKey) headers.Authorization = `Bearer ${config.llmApiKey}`;
+    // OpenAI-compatible endpoint (ml/serve.py or Gemini).
+    const res = await fetch(`${config.llmUrl}${config.llmChatPath}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       signal: controller.signal,
       body: JSON.stringify({
+        model: config.llmModel,
         messages: [{ role: 'system', content: system }, ...messages],
         max_tokens: 220,
         temperature: 0.8,

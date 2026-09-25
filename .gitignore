@@ -12,5 +12,21 @@ __pycache__/
 *.bin
 adapter_model/
 .venv/
+ml/.venv-linux/
+ml/.cache/
 ml/models/
 ml/data/
+
+# Local harness artifacts
+.harness/
+
+# Terraform — provider binaries, plan files and state must never be committed.
+# (.terraform.lock.hcl IS committed on purpose: it pins the provider version.)
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+
+# Deploy bundle build artifact (regenerate: tar czf ml/aws/loveai-deploy.tar.gz -C ml/aws bin nginx systemd)
+ml/aws/loveai-deploy.tar.gz

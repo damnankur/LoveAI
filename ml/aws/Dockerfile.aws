@@ -1,0 +1,63 @@
+# loveAI persona inference service — AWS/CPU image.
+#
+# Why a second Dockerfile instead of reusing ml/Dockerfile:
+#   * ml/Dockerfile is `nvidia/cuda:12.1.1-runtime-ubuntu22.04` — x86_64 only, so it
+#     cannot even run on the ARM64 Graviton instance we recommend ($0 compute).
+#   * ml/requirements.txt pins the training stack (torch+cu121, trl, datasets,
+#     bitsandbytes): ~2.5 GB of wheels that inference never imports.
+#   * This image is python:3.12-slim (multi-arch) + CPU torch → small, works on
+#     arm64 and x86_64, and fits comfortably on a 16 GB gp3 root volume.
+# Keep ml/Dockerfile for the GPU path (g4dn, local dev, HF Space).
+#
+# BUILD CONTEXT IS ml/ (serve.py needs ../persona_vector.py):
+#   cd ml && docker build -f aws/Dockerfile.aws -t loveai-persona-api:0.1.0 .
+#
+# The model is NOT baked in. Mount it at runtime so the image stays cacheable and
+# a model update is a file swap, not a rebuild:
+#   docker run -d --name loveai-api --restart unless-stopped \
+#     -p 127.0.0.1:8000:8000 \
+#     -v /opt/loveai/models/persona-merged:/app/models/persona-merged:ro \
+#     -e LLM_API_KEY=... -e PERSONA_DTYPE=float16 \
+#     loveai-persona-api:0.1.0
+FROM python:3.12-slim
+
+LABEL org.opencontainers.image.title="loveai-persona-api" \
+      org.opencontainers.image.description="OpenAI-compatible inference server for the fine-tuned loveAI persona model (CPU)" \
+      org.opencontainers.image.source="https://github.com/damnankur/LoveAI"
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PORT=8000 \
+    PERSONA_MODEL_DIR=/app/models/persona-merged \
+    PERSONA_DTYPE=float32
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY aws/requirements-aws.txt ./requirements.txt
+# torch from the CPU wheel index (linux_aarch64 wheels exist for Graviton);
+# everything else comes from PyPI.
+RUN pip install --upgrade pip \
+ && pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu \
+ && pip install -r requirements.txt
+
+COPY persona_vector.py ./
+COPY aws/serve.py ./
+
+RUN useradd --create-home --uid 10001 loveai \
+ && mkdir -p /app/models \
+ && chown -R loveai:loveai /app
+USER loveai
+
+EXPOSE 8000
+
+# start-period is generous: loading a 1B model on 2 vCPU takes 30-120 s.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=180s --retries=3 \
+  CMD curl -fsS "http://127.0.0.1:${PORT}/health" || exit 1
+
+CMD ["python3", "serve.py", "--model", "/app/models/persona-merged", "--port", "8000"]

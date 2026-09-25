@@ -15,7 +15,7 @@ from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from trl import SFTTrainer, SFTConfig
 
-MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
+MODEL = "google/gemma-3-1b-it"
 
 
 def load_rows(path: Path) -> list[dict]:
@@ -26,12 +26,37 @@ def load_rows(path: Path) -> list[dict]:
     return rows
 
 
+def restore_fp32_adapters(trainer) -> int:
+    """Undo TRL's QLoRA bf16 adapter cast when training in fp16.
+
+    TRL's SFTTrainer casts every trainable (adapter) tensor of a *quantized* model to
+    bfloat16 (QLoRA paper, sect. 3). Ampere+ wants that; Turing (GTX 1650 Ti, sm_75) has
+    no native bf16, and torch's fp16 AMP GradScaler refuses to unscale bf16 grads
+    ("_amp_foreach_non_finite_check_and_unscale_cuda not implemented for 'BFloat16'").
+    Restoring fp32 master weights (peft's autocast_adapter_dtype default) fixes it.
+    """
+    restored = 0
+    for param in trainer.model.parameters():
+        if param.requires_grad and param.dtype == torch.bfloat16:
+            param.data = param.data.to(torch.float32)
+            restored += 1
+    return restored
+
+
 def compute_dtype() -> torch.dtype:
-    """bf16 needs Ampere+; the GTX 1650 Ti (Turing, sm_75) uses fp16."""
-    if torch.cuda.is_available():
-        major = torch.cuda.get_device_capability()[0]
-        return torch.bfloat16 if major >= 8 else torch.float16
-    return torch.float32
+    """bf16 only on Ampere+; Turing (GTX 1650 Ti, sm_75) falls back to fp16.
+
+    Do not use the bare ``torch.cuda.is_bf16_supported()``: it defaults to
+    ``including_emulation=True`` and reports True on sm_75, where bf16 matmuls are
+    emulated (slow) even though the card has no native bf16 support.
+    """
+    if not torch.cuda.is_available():
+        return torch.float32
+    try:
+        native_bf16 = torch.cuda.is_bf16_supported(including_emulation=False)
+    except TypeError:  # torch < 2.3 has no including_emulation kwarg
+        native_bf16 = torch.cuda.get_device_capability()[0] >= 8
+    return torch.bfloat16 if native_bf16 else torch.float16
 
 
 def main() -> None:
@@ -53,6 +78,7 @@ def main() -> None:
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
         bnb_4bit_compute_dtype=compute_dtype(),
+        bnb_4bit_quant_storage=compute_dtype(),
         bnb_4bit_use_double_quant=True,
     )
     tokenizer = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
@@ -60,7 +86,7 @@ def main() -> None:
         tokenizer.pad_token = tokenizer.eos_token
 
     model = AutoModelForCausalLM.from_pretrained(
-        args.model, quantization_config=bnb, device_map="auto", trust_remote_code=True
+        args.model, quantization_config=bnb, device_map="auto", torch_dtype=compute_dtype(), trust_remote_code=True
     )
     model = prepare_model_for_kbit_training(model)
     lora = LoraConfig(
@@ -94,7 +120,7 @@ def main() -> None:
         save_strategy="epoch",
         bf16=compute_dtype() == torch.bfloat16,
         fp16=compute_dtype() == torch.float16,
-        max_seq_length=1024,
+        max_length=1024,
         report_to=[],
         remove_unused_columns=False,
         dataset_text_field="text",
@@ -105,8 +131,11 @@ def main() -> None:
         args=sft_config,
         train_dataset=train_ds,
         eval_dataset=val_ds,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
     )
+    if compute_dtype() == torch.float16:
+        restored = restore_fp32_adapters(trainer)
+        print(f"fp16 path: restored {restored} adapter tensors to fp32 (TRL cast them to bf16)")
     trainer.train()
     trainer.save_model(args.output)
     tokenizer.save_pretrained(args.output)

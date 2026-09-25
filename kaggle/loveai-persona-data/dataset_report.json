@@ -1,0 +1,363 @@
+{
+  "seed": 42,
+  "personas": 200,
+  "user_prompts": 26,
+  "prompt_themes": {
+    "stress_and_drain": [
+      "I had a long day and I am feeling drained."
+    ],
+    "procrastination": [
+      "I keep procrastinating on a task at work."
+    ],
+    "career_and_direction": [
+      "I am thinking about switching careers.",
+      "I feel like I have no direction lately."
+    ],
+    "performance_nerves": [
+      "I feel nervous about a presentation tomorrow."
+    ],
+    "friend_conflict": [
+      "I argued with a friend today and do not know what to do."
+    ],
+    "positive_news": [
+      "I am excited about a new project I just started!",
+      "I just finished something I have been working on for months!"
+    ],
+    "rumination": [
+      "I cannot stop overthinking a decision I made."
+    ],
+    "low_mood": [
+      "Tell me how you would cheer me up today."
+    ],
+    "criticism": [
+      "Someone criticized my work and I took it personally."
+    ],
+    "loneliness": [
+      "I feel lonely, even around people."
+    ],
+    "grief": [
+      "My grandmother passed away last month and I am not coping well."
+    ],
+    "romantic_relationship": [
+      "My partner and I broke up and I cannot stop missing them.",
+      "My partner and I have barely spoken in days and I miss them."
+    ],
+    "family": [
+      "My parents keep pushing me toward a life I do not want."
+    ],
+    "self_worth": [
+      "I keep comparing myself to everyone and I feel like I am not good enough."
+    ],
+    "money": [
+      "Money is really tight right now and I am scared about rent."
+    ],
+    "sleep": [
+      "I cannot sleep and my brain will not switch off at night."
+    ],
+    "social_anxiety": [
+      "I dread meeting new people and I do not know why."
+    ],
+    "dating": [
+      "I am so tired of dating apps and first dates."
+    ],
+    "boundaries": [
+      "I say yes to everything and I am completely spread too thin."
+    ],
+    "everyday_check_in": [
+      "Nothing much is going on, I just wanted to check in with you."
+    ],
+    "health_worry": [
+      "I am waiting for some test results and I am scared."
+    ],
+    "anger": [
+      "I snapped at someone I love today and I feel awful about it."
+    ],
+    "big_decisions": [
+      "I have a big decision to make and I keep going back and forth."
+    ]
+  },
+  "scenarios": [
+    "anger",
+    "big_decision",
+    "boundaries",
+    "breakup",
+    "career_change",
+    "celebration",
+    "check_in",
+    "cheer_up",
+    "criticism",
+    "dating_fatigue",
+    "directionless",
+    "drained",
+    "family_pressure",
+    "friend_conflict",
+    "good_news",
+    "grief",
+    "health_worry",
+    "lonely",
+    "money_stress",
+    "overthinking",
+    "partner_conflict",
+    "performance_nerves",
+    "procrastination",
+    "self_esteem",
+    "sleep",
+    "social_anxiety"
+  ],
+  "sft": {
+    "total": 5200,
+    "train": 4680,
+    "val": 520,
+    "synthetic": 5200,
+    "real": 0,
+    "real_by_source": {}
+  },
+  "dpo": {
+    "total": 5200,
+    "train": 4680,
+    "val": 520,
+    "synthetic": 5200,
+    "real": 0,
+    "real_by_source": {}
+  },
+  "real_data_selector": null,
+  "real_limit_per_source": 800,
+  "real_max_fraction": 0.6,
+  "quality_gate": {
+    "dialogue_level": [
+      "starts with a user turn",
+      "no crisis terms anywhere",
+      "dialogue >= 12 words"
+    ],
+    "row_level": [
+      "assistant target >= 4 words",
+      "user turns >= 2 words",
+      "no turn > 220 words",
+      "no row > 700 words",
+      "no clinical/deflection register in assistant text"
+    ],
+    "min_user_words": 2,
+    "min_assistant_words": 4,
+    "min_dialogue_words": 12,
+    "max_words_per_turn": 220,
+    "max_words_per_row": 700,
+    "crisis_terms": [
+      "suicide",
+      "suicidal",
+      "kill myself",
+      "kill yourself",
+      "self-harm",
+      "self harm",
+      "cut myself",
+      "end my life",
+      "want to die",
+      "overdose",
+      "988",
+      "crisis line",
+      "emergency services",
+      "call 911"
+    ],
+    "clinical_terms": [
+      "as an ai",
+      "i am an ai",
+      "i'm an ai",
+      "language model",
+      "i am not a therapist",
+      "i'm not a therapist",
+      "licensed therapist",
+      "seek professional help",
+      "seek help from a professional",
+      "consult a professional",
+      "speak to a professional",
+      "medical advice",
+      "prescrib",
+      "medication",
+      "diagnos",
+      "psychiatr",
+      "dsm-",
+      "dsm 5",
+      "intake form",
+      "insurance",
+      "copay",
+      "hotline",
+      "helpline"
+    ]
+  },
+  "real_sources": [],
+  "real_source_registry": [
+    {
+      "name": "empathetic_dialogues",
+      "hf_id": "Estwld/empathetic_dialogues_llm",
+      "url": "https://huggingface.co/datasets/Estwld/empathetic_dialogues_llm",
+      "license": "CC-BY-NC-4.0 (upstream EmpatheticDialogues; mirror is tagged Apache-2.0)",
+      "license_class": "noncommercial",
+      "approx_dialogues": 24850,
+      "format": "1 row = 1 conversation, `conversations` = [{role, content}], + emotion/situation",
+      "maps_to": "SFT (multi-turn, system+user/assistant) + DPO",
+      "themes": [
+        "all 12 core themes",
+        "everyday emotional disclosure",
+        "situation-grounded empathy"
+      ],
+      "used_in_this_build": false,
+      "notes": "The standard empathy benchmark. Uses a parquet mirror because facebook/empathetic_dialogues is script-only and no longer loadable with datasets>=4. 32 emotion labels available for filtering."
+    },
+    {
+      "name": "esconv",
+      "hf_id": "thu-coai/esconv",
+      "url": "https://huggingface.co/datasets/thu-coai/esconv",
+      "license": "CC-BY-NC-4.0",
+      "license_class": "noncommercial",
+      "approx_dialogues": 1300,
+      "format": "1 row = JSON string: dialog[{text, speaker(usr/sys), strategy}], emotion_type, problem_type",
+      "maps_to": "SFT (multi-turn) + DPO; strategy labels usable for eval",
+      "themes": [
+        "stress",
+        "career crisis",
+        "loneliness",
+        "health worry",
+        "relationships"
+      ],
+      "used_in_this_build": false,
+      "notes": "Human-to-human emotional support with helping-skills strategy annotations (Question/Restatement/Reflection/Affirmation...). Closest register to the loveAI companion of anything public."
+    },
+    {
+      "name": "counsel_chat",
+      "hf_id": "nbertagnolli/counsel-chat",
+      "url": "https://huggingface.co/datasets/nbertagnolli/counsel-chat",
+      "license": "unclear (site-scraped; Kaggle copy listed CC0)",
+      "license_class": "unclear",
+      "approx_dialogues": 2775,
+      "format": "1 row = 1 Q/A: questionText, answerText, topic (therapist answers)",
+      "maps_to": "SFT (single-turn) + DPO",
+      "themes": [
+        "anxiety",
+        "relationships",
+        "self-esteem",
+        "family",
+        "trauma"
+      ],
+      "used_in_this_build": false,
+      "notes": "Licensed-therapist answers: valuable realism on relationship topics, but the register is clinical, so the quality gate drops referral/diagnosis boilerplate before it reaches training."
+    },
+    {
+      "name": "synthetic_persona_chat",
+      "hf_id": "google/Synthetic-Persona-Chat",
+      "url": "https://huggingface.co/datasets/google/Synthetic-Persona-Chat",
+      "license": "CC-BY-4.0",
+      "license_class": "permissive",
+      "approx_dialogues": 10906,
+      "format": "1 row = persona pair + 'User 1: ...' diarised conversation",
+      "maps_to": "SFT (multi-turn) + DPO",
+      "themes": [
+        "everyday check-in",
+        "small talk",
+        "getting to know someone",
+        "hobbies"
+      ],
+      "used_in_this_build": false,
+      "notes": "Synthetic (LLM-generated, Google) but explicitly *persona-conditioned*: trains the model to hold a persona while chatting. Permissive license and it covers the small-talk gap the emotional corpora miss."
+    },
+    {
+      "name": "soda",
+      "hf_id": "allenai/soda",
+      "url": "https://huggingface.co/datasets/allenai/soda",
+      "license": "CC-BY-4.0",
+      "license_class": "permissive",
+      "approx_dialogues": 1489842,
+      "format": "1 row = social dialogue (list of alternating utterances) + relation label",
+      "maps_to": "SFT (multi-turn) + DPO",
+      "themes": [
+        "small talk",
+        "everyday plans",
+        "opinions",
+        "light disagreement"
+      ],
+      "used_in_this_build": false,
+      "notes": "1.5M short social dialogues -- the antidote to a companion that can only respond to distress. Only a small sample is used (default 800) and it is streamed with a bounded shuffle rather than downloaded (the train parquet is ~700 MB)."
+    },
+    {
+      "name": "mental_health_therapy",
+      "hf_id": "fadodr/mental_health_therapy",
+      "url": "https://huggingface.co/datasets/fadodr/mental_health_therapy",
+      "license": "MIT",
+      "license_class": "permissive",
+      "approx_dialogues": 12258,
+      "format": "1 row = instruction (boilerplate) + patient `input` + therapist-style `output`",
+      "maps_to": "SFT (single-turn) + DPO",
+      "themes": [
+        "social anxiety",
+        "trust",
+        "relationships",
+        "self-worth",
+        "grief"
+      ],
+      "used_in_this_build": false,
+      "notes": "Permissively licensed and long-form; likely GPT-3.5-generated rather than human."
+    },
+    {
+      "name": "therapy_multiturn",
+      "hf_id": "Abc7347/therapy-conversations-multiturn",
+      "url": "https://huggingface.co/datasets/Abc7347/therapy-conversations-multiturn",
+      "license": "not stated by the uploader",
+      "license_class": "unclear",
+      "approx_dialogues": 2020,
+      "format": "1 row = messages[{role, content}] (multi-turn therapy sessions)",
+      "maps_to": "SFT (multi-turn)",
+      "themes": [
+        "anxiety",
+        "coping",
+        "sleep",
+        "work stress",
+        "family"
+      ],
+      "used_in_this_build": false,
+      "notes": "Multi-turn companion-style therapy dialogue. Uploader states no license -> opt-in only (not in the default build)."
+    },
+    {
+      "name": "relationship_advice",
+      "hf_id": "yonatanko/Relationship_Advice",
+      "url": "https://huggingface.co/datasets/yonatanko/Relationship_Advice",
+      "license": "unknown (reddit-derived)",
+      "license_class": "unclear",
+      "approx_dialogues": 400,
+      "format": "1 row = post + comment_1/comment_2 + more_helpful_comment (human preference)",
+      "maps_to": "DPO (genuine chosen/rejected) + SFT (single-turn)",
+      "themes": [
+        "partner conflict",
+        "jealousy",
+        "breakups",
+        "relationship boundaries"
+      ],
+      "used_in_this_build": false,
+      "notes": "The only source here with *human* preference labels: it gives DPO pairs that contrast two real replies instead of a real reply against a template. Small (400 rows) and license-unclear -> opt-in."
+    }
+  ],
+  "real_profiles_available": {
+    "permissive": [
+      "synthetic_persona_chat",
+      "soda",
+      "mental_health_therapy"
+    ],
+    "noncommercial": [
+      "empathetic_dialogues",
+      "esconv",
+      "counsel_chat"
+    ],
+    "unclear": [
+      "therapy_multiturn",
+      "relationship_advice"
+    ],
+    "all": [
+      "empathetic_dialogues",
+      "esconv",
+      "counsel_chat",
+      "synthetic_persona_chat",
+      "soda",
+      "mental_health_therapy",
+      "therapy_multiturn",
+      "relationship_advice"
+    ]
+  },
+  "provenance_keys_in_rows": false
+}

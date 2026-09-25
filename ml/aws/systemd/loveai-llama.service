@@ -1,0 +1,42 @@
+# loveAI persona inference — llama.cpp server (GGUF, CPU, OpenAI-compatible :8000).
+#
+# Installed by user-data.sh. Manage with:
+#   systemctl status  loveai-llama
+#   journalctl -u loveai-llama -f
+#   systemctl restart loveai-llama
+[Unit]
+Description=loveAI persona inference server (llama.cpp, OpenAI-compatible API on 127.0.0.1:8000)
+Documentation=file:/opt/loveai/README.txt
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=loveai
+Group=loveai
+# Optional: referenced with a leading '-' so a missing file is not fatal.
+EnvironmentFile=-/etc/loveai/deploy.env
+ExecStart=/usr/local/bin/loveai-start-llama.sh
+Restart=always
+RestartSec=5
+
+# Inference is memory-bandwidth bound; do not let the kernel sacrifice the model
+# before it kills something else.
+OOMScoreAdjust=-400
+Nice=5
+LimitNOFILE=65535
+TimeoutStopSec=30
+KillSignal=SIGINT
+SyslogIdentifier=loveai-llama
+
+# Hardening (drop these if you need to debug on the box).
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=full
+ProtectKernelTunables=yes
+RestrictSUIDSGID=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,7 +1,7 @@
 """Merge the LoRA adapters into a standalone model for CPU/production serving.
 
 Usage:
-    python ml/merge.py --base Qwen/Qwen2.5-1.5B-Instruct --adapter ml/models/persona-dpo --output ml/models/persona-merged
+    python ml/merge.py --base google/gemma-3-1b-it --adapter ml/models/persona-dpo --output ml/models/persona-merged
 """
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--base", default="Qwen/Qwen2.5-1.5B-Instruct")
+    ap.add_argument("--base", default="google/gemma-3-1b-it")
     ap.add_argument("--adapter", default="ml/models/persona-dpo")
     ap.add_argument("--output", default="ml/models/persona-merged")
     args = ap.parse_args()

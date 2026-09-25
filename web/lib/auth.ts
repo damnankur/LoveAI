@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { randomBytes } from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
 import { pool } from './db';
 import { config } from './config';
 
@@ -15,6 +16,8 @@ interface GoogleProfile {
   picture: string | null;
 }
 
+const oauthClient = new OAuth2Client(config.googleClientId);
+
 export async function verifyGoogleIdToken(
   idToken: string,
   expectedClientId?: string
@@ -27,31 +30,19 @@ export async function verifyGoogleIdToken(
     return { email, name: email.split('@')[0], picture: null };
   }
 
-  const url = `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`;
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`Google token verification failed (HTTP ${res.status})`);
-  }
-  const info = (await res.json()) as {
-    error?: string;
-    aud?: string;
-    email?: string;
-    email_verified?: string | boolean;
-    name?: string;
-    picture?: string;
-  };
-  if (info.error) throw new Error(`Google token error: ${info.error}`);
-  if (!info.email) throw new Error('Google token does not contain an email');
-  if (String(info.email_verified) === 'false') {
+  const ticket = await oauthClient.verifyIdToken({
+    idToken,
+    audience: expectedClientId || config.googleClientId,
+  });
+  const payload = ticket.getPayload();
+  if (!payload?.email) throw new Error('Google token does not contain an email');
+  if (String(payload.email_verified) === 'false') {
     throw new Error('Google email is not verified');
   }
-  if (expectedClientId && info.aud !== expectedClientId) {
-    throw new Error('Google token audience does not match this client');
-  }
   return {
-    email: String(info.email),
-    name: info.name ? String(info.name) : null,
-    picture: info.picture ? String(info.picture) : null,
+    email: payload.email,
+    name: payload.name ?? null,
+    picture: payload.picture ?? null,
   };
 }
 
