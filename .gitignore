@@ -46,3 +46,6 @@ ml/aws/run_dpo_and_merge.py
 ml/aws/run_sagemaker.py
 
 
+
+.vercel
+.env*

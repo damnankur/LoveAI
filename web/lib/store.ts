@@ -77,7 +77,6 @@ export async function findSimilarPersonas(
       dimensions: r.dimensions,
       personaType: r.persona_type ?? null,
       similarity: Number(r.similarity),
-      persona_vector_json: r.persona_vector_json ? JSON.parse(r.persona_vector_json as string) : undefined,
     })), limit, minSimilarity);
   }
 
