@@ -37,7 +37,8 @@ export async function checkConnection(): Promise<boolean> {
   try {
     await pool.query('SELECT 1');
     return true;
-  } catch {
+  } catch (err: any) {
+    console.error('[db] connection error:', err?.message || err);
     return false;
   }
 }
