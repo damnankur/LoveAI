@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { checkConnection, isPgvectorAvailable } from '@/lib/db';
+import { checkConnection, isPgvectorAvailable, getDbError, getDbHost } from '@/lib/db';
 import { config } from '@/lib/config';
 
 export const runtime = 'nodejs';
@@ -12,6 +12,8 @@ export async function GET() {
     status: 'ok',
     service: 'LoveAI Server',
     db: db ? 'connected' : 'unreachable',
+    dbHost: getDbHost(),
+    dbError: db ? undefined : getDbError(),
     pgvector: pgv ? 'available' : 'fallback',
     llm: config.llmMock ? 'mock' : config.llmEnabled && config.llmUrl ? `http ${config.llmUrl}` : 'disabled',
     matrixQuestions: 34,

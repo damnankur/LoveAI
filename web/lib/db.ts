@@ -33,12 +33,34 @@ export async function isPgvectorAvailable(): Promise<boolean> {
   return pgvectorAvailable;
 }
 
+let lastDbError = '';
+
+export function getDbError(): string {
+  return lastDbError;
+}
+
+export function getDbHost(): string {
+  const u = config.databaseUrl || '';
+  if (!u) return 'empty';
+  try {
+    const parts = u.split('@');
+    if (parts.length > 1) {
+      return parts[1].split('/')[0];
+    }
+    return 'invalid-format';
+  } catch {
+    return 'parse-err';
+  }
+}
+
 export async function checkConnection(): Promise<boolean> {
   try {
     await pool.query('SELECT 1');
+    lastDbError = '';
     return true;
   } catch (err: any) {
-    console.error('[db] connection error:', err?.message || err);
+    lastDbError = err?.message || String(err);
+    console.error('[db] connection error:', lastDbError);
     return false;
   }
 }
