@@ -3,17 +3,36 @@ import { config } from './config';
 
 const globalForPg = globalThis as unknown as { loveaiPool?: Pool };
 
-const url = config.databaseUrl || '';
-const isLocal =
-  url.includes('localhost') || url.includes('127.0.0.1') || url.startsWith('postgres://loveai:');
+const rawUrl = config.databaseUrl || '';
+
+function parseDbConfig(connStr: string) {
+  if (!connStr) return {};
+  try {
+    const u = new URL(connStr);
+    const isLocal = u.hostname === 'localhost' || u.hostname === '127.0.0.1';
+    return {
+      host: u.hostname,
+      port: Number(u.port) || 5432,
+      user: decodeURIComponent(u.username),
+      password: decodeURIComponent(u.password),
+      database: u.pathname.replace(/^\//, '') || 'postgres',
+      ssl: isLocal ? undefined : { rejectUnauthorized: false },
+      max: 10,
+      connectionTimeoutMillis: 10000,
+    };
+  } catch (err) {
+    console.error('[db] parseDbConfig error:', err);
+    return {
+      connectionString: connStr,
+      ssl: connStr.includes('localhost') ? undefined : { rejectUnauthorized: false },
+      max: 10,
+    };
+  }
+}
 
 export const pool =
   globalForPg.loveaiPool ??
-  new Pool({
-    connectionString: config.databaseUrl,
-    ssl: isLocal ? undefined : { rejectUnauthorized: false },
-    max: 10,
-  });
+  new Pool(parseDbConfig(rawUrl));
 
 if (!globalForPg.loveaiPool) globalForPg.loveaiPool = pool;
 
