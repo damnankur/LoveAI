@@ -60,11 +60,20 @@ def compute_dtype() -> torch.dtype:
 
 
 def main() -> None:
+    import os
+    sm_train = os.environ.get("SM_CHANNEL_TRAIN")
+    sm_val = os.environ.get("SM_CHANNEL_VAL", sm_train)
+    sm_model_dir = os.environ.get("SM_MODEL_DIR")
+
+    data_default = os.path.join(sm_train, "persona_sft_train.jsonl") if sm_train else "ml/data/persona_sft_train.jsonl"
+    val_default = os.path.join(sm_val, "persona_sft_val.jsonl") if sm_val else "ml/data/persona_sft_val.jsonl"
+    out_default = sm_model_dir if sm_model_dir else "ml/models/persona-sft"
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default=MODEL)
-    ap.add_argument("--data", default="ml/data/persona_sft_train.jsonl")
-    ap.add_argument("--val", default="ml/data/persona_sft_val.jsonl")
-    ap.add_argument("--output", default="ml/models/persona-sft")
+    ap.add_argument("--data", default=data_default)
+    ap.add_argument("--val", default=val_default)
+    ap.add_argument("--output", default=out_default)
     ap.add_argument("--epochs", type=int, default=3)
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--rank", type=int, default=16)
@@ -120,7 +129,7 @@ def main() -> None:
         save_strategy="epoch",
         bf16=compute_dtype() == torch.bfloat16,
         fp16=compute_dtype() == torch.float16,
-        max_length=1024,
+        max_length=512,
         report_to=[],
         remove_unused_columns=False,
         dataset_text_field="text",

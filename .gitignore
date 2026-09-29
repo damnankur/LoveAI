@@ -30,3 +30,19 @@ crash.log
 
 # Deploy bundle build artifact (regenerate: tar czf ml/aws/loveai-deploy.tar.gz -C ml/aws bin nginx systemd)
 ml/aws/loveai-deploy.tar.gz
+
+# Local scratch, images, and temporary run outputs
+*.png
+*.tar.gz
+kaggle/*output*/
+kaggle/raw-output*/
+kaggle/run*
+kaggle/loveai-persona-sft/
+ml/llama.cpp/
+web/scripts/
+ml/aws/launch_training.sh
+ml/aws/requirements-sagemaker.txt
+ml/aws/run_dpo_and_merge.py
+ml/aws/run_sagemaker.py
+
+

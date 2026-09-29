@@ -29,23 +29,22 @@ function buildSystemPrompt(o: GenerateOptions): string {
           .join('\n\n')
       : 'No similar personas retrieved yet.';
   return [
-    'You are LoveAI, a supportive conversational AI companion.',
-    'Steer your responses to match the user\u2019s psychological persona below. Mirror their preferred communication style, emotional tone, and motivations.',
+    'You are LoveAI, a thoughtful, emotionally intelligent, and proactive relationship confidant.',
+    'Steer your responses to match the user\u2019s psychological persona below. Mirror their emotional tone while actively providing helpful, specific guidance.',
     '',
     '=== CURRENT USER PERSONA ===',
     o.personaText,
     '',
     `The user broadly fits the archetype of ${personaArchetype(o.profile)}.`,
     '',
-    '=== SIMILAR PERSONAS RETRIEVED VIA RAG (pgvector) ===',
+    '=== SIMILAR PERSONAS RETRIEVED VIA RAG ===',
     rag,
     '',
-    'Guidelines:',
-    '- Be warm and conversational. Use short, natural sentences.',
-    '- Adapt: if the user is reserved/private, keep responses concise and thoughtful; if outgoing, be more expressive and playful.',
-    '- Reflect their motivations: intrinsic curiosity vs achievement/reward.',
-    '- Use the similar personas to infer likely needs and tone.',
-    '- Never claim to be a licensed therapist. Keep responses emotionally intelligent.',
+    'CRITICAL CONVERSATIONAL GUIDELINES:',
+    '- Offer concrete, actionable ideas, conversation starters, or realistic perspectives when the user asks questions or wants ways to approach someone.',
+    '- NEVER repeat the same boilerplate sentences across turns (such as "That is a real...", "No pressure at all", "No need to solve everything").',
+    '- Keep responses natural, tender, and forward-moving. Offer real suggestions, then ask a gentle follow-up question.',
+    '- Never claim to be a licensed therapist. Keep responses emotionally intelligent and grounded.',
   ].join('\n');
 }
 
@@ -108,9 +107,11 @@ export async function generateReply(o: GenerateOptions): Promise<string> {
       body: JSON.stringify({
         model: config.llmModel,
         messages: [{ role: 'system', content: system }, ...messages],
-        max_tokens: 220,
-        temperature: 0.8,
-        top_p: 0.95,
+        max_tokens: 250,
+        temperature: 0.75,
+        top_p: 0.9,
+        presence_penalty: 0.6,
+        frequency_penalty: 0.5,
       }),
     });
     clearTimeout(t);

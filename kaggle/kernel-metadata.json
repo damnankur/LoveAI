@@ -8,7 +8,10 @@
   "enable_gpu": "true",
   "enable_internet": "true",
   "machine_shape": "NvidiaTeslaT4",
-  "dataset_sources": ["singhankur01/loveai-persona-data"],
+  "dataset_sources": [
+    "singhankur01/loveai-persona-data",
+    "singhankur01/loveai-persona-sft"
+  ],
   "competition_sources": [],
   "kernel_sources": [],
   "model_sources": []

@@ -1,36 +1,32 @@
 import type { Metadata } from 'next';
-import { Caveat, Fraunces, Lora } from 'next/font/google';
+import { Plus_Jakarta_Sans, Playfair_Display, Caveat } from 'next/font/google';
 import ThemeInit from '@/lib/theme-init';
 import RevealObserver from '@/components/RevealObserver';
 import './globals.css';
 
-const fraunces = Fraunces({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: 'variable',
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
   style: ['normal', 'italic'],
-  variable: '--font-display',
+  variable: '--font-serif',
   display: 'swap',
 });
 
 const caveat = Caveat({
   subsets: ['latin'],
-  weight: 'variable',
   variable: '--font-hand',
   display: 'swap',
 });
 
-const lora = Lora({
-  subsets: ['latin'],
-  weight: 'variable',
-  style: ['normal', 'italic'],
-  variable: '--font-body',
-  display: 'swap',
-});
-
 export const metadata: Metadata = {
-  title: 'loveAI — a companion that knows you',
+  title: 'loveAI — love advice that fits how you love',
   description:
-    'loveAI — a companion that learns how you think, feel, and communicate, then talks to you like someone who already knows you.',
+    'loveAI learns how you love — your attachment style and love language — then gives relationship advice in the voice of a confidant who knows you.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -48,7 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className={`${fraunces.variable} ${caveat.variable} ${lora.variable}`}>
+      <body className={`${jakarta.variable} ${playfair.variable} ${caveat.variable}`}>
         <ThemeInit />
         <RevealObserver />
         {children}

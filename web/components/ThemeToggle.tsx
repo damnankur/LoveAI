@@ -1,10 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getTheme, setTheme, Theme } from '@/lib/theme';
 
 function ThemeToggle() {
-  const [theme, setThemeState] = useState<Theme>(getTheme);
+  const [mounted, setMounted] = useState(false);
+  const [theme, setThemeState] = useState<Theme>('dark');
+
+  useEffect(() => {
+    setMounted(true);
+    setThemeState(getTheme());
+  }, []);
 
   return (
     <button
@@ -18,7 +24,7 @@ function ThemeToggle() {
       aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
       title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
     >
-      {theme === 'dark' ? '☀' : '☾'}
+      {mounted ? (theme === 'dark' ? '☀' : '☾') : '☾'}
     </button>
   );
 }

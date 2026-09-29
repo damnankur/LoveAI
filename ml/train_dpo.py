@@ -29,8 +29,17 @@ def load_rows(path: Path) -> list[dict]:
     return rows
 
 
-def to_text(messages: list[dict]) -> str:
-    return tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=False)
+def to_prompt(messages: list[dict]) -> str:
+    return tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+
+
+def to_response(messages: list[dict]) -> str:
+    if isinstance(messages, list) and messages and "content" in messages[0]:
+        content = messages[0]["content"]
+    else:
+        content = str(messages)
+    end_tag = "<end_of_turn>\n" if "gemma" in BASE_MODEL.lower() else (tokenizer.eos_token or "")
+    return content + end_tag
 
 
 def restore_fp32_adapters(trainer) -> int:
@@ -67,11 +76,22 @@ def compute_dtype() -> torch.dtype:
 
 
 def main() -> None:
+    import os
+    sm_train = os.environ.get("SM_CHANNEL_TRAIN")
+    sm_val = os.environ.get("SM_CHANNEL_VAL", sm_train)
+    sm_sft = os.environ.get("SM_CHANNEL_SFT_MODEL")
+    sm_model_dir = os.environ.get("SM_MODEL_DIR")
+
+    model_default = sm_sft if sm_sft else BASE_MODEL
+    data_default = os.path.join(sm_train, "persona_dpo_train.jsonl") if sm_train else "ml/data/persona_dpo_train.jsonl"
+    val_default = os.path.join(sm_val, "persona_dpo_val.jsonl") if sm_val else "ml/data/persona_dpo_val.jsonl"
+    out_default = sm_model_dir if sm_model_dir else "ml/models/persona-dpo"
+
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default=BASE_MODEL, help="Base model or SFT adapter dir")
-    ap.add_argument("--data", default="ml/data/persona_dpo_train.jsonl")
-    ap.add_argument("--val", default="ml/data/persona_dpo_val.jsonl")
-    ap.add_argument("--output", default="ml/models/persona-dpo")
+    ap.add_argument("--model", default=model_default, help="Base model or SFT adapter dir")
+    ap.add_argument("--data", default=data_default)
+    ap.add_argument("--val", default=val_default)
+    ap.add_argument("--output", default=out_default)
     ap.add_argument("--epochs", type=int, default=2)
     ap.add_argument("--lr", type=float, default=1e-4)
     ap.add_argument("--beta", type=float, default=0.1)
@@ -100,13 +120,13 @@ def main() -> None:
         base_id = json.loads(adapter_config_path.read_text(encoding="utf-8")).get("base_model_name_or_path") or BASE_MODEL
         print(f"Continuing from SFT adapter {model_dir} (base: {base_id})")
         base = AutoModelForCausalLM.from_pretrained(
-            base_id, quantization_config=bnb, device_map="auto", dtype=compute_dtype(), trust_remote_code=True
+            base_id, quantization_config=bnb, device_map="auto", torch_dtype=compute_dtype(), trust_remote_code=True
         )
         model = PeftModel.from_pretrained(base, str(model_dir), is_trainable=True)
         lora = None
     else:
         model = AutoModelForCausalLM.from_pretrained(
-            args.model, quantization_config=bnb, device_map="auto", dtype=compute_dtype(), trust_remote_code=True
+            args.model, quantization_config=bnb, device_map="auto", torch_dtype=compute_dtype(), trust_remote_code=True
         )
         lora = LoraConfig(
             r=16,
@@ -129,9 +149,9 @@ def main() -> None:
         ds = Dataset.from_list(load_rows(path))
         return ds.map(
             lambda r: {
-                "prompt": to_text(r["prompt"]),
-                "chosen": to_text(r["chosen"]),
-                "rejected": to_text(r["rejected"]),
+                "prompt": to_prompt(r["prompt"]),
+                "chosen": to_response(r["chosen"]),
+                "rejected": to_response(r["rejected"]),
             },
             remove_columns=["persona_id", "prompt", "chosen", "rejected"],
         )
@@ -154,7 +174,7 @@ def main() -> None:
         save_strategy="epoch",
         bf16=compute_dtype() == torch.bfloat16,
         fp16=compute_dtype() == torch.float16,
-        max_length=1024,
+        max_length=512,
         report_to=[],
     )
 
